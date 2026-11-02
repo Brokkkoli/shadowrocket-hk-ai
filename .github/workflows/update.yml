@@ -1,0 +1,39 @@
+name: Refresh Hong Kong AI configuration
+
+on:
+  schedule:
+    - cron: '23 0 * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - config.template.conf
+      - scripts/update_config.py
+      - .github/workflows/update.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: hk-ai-config
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Refresh and validate official Voice addresses
+        run: python3 scripts/update_config.py
+      - name: Commit only the generated configuration
+        run: |
+          git add -- Howard-HK-AI-Only.conf
+          if git diff --cached --quiet -- Howard-HK-AI-Only.conf; then
+            exit 0
+          fi
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git commit -m "Refresh official ChatGPT Voice addresses"
+          git push origin HEAD:main
