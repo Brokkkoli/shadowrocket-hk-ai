@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Refresh and validate official Voice addresses
         run: python3 scripts/update_config.py
       - name: Commit only the generated configuration
